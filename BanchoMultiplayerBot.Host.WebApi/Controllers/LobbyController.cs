@@ -19,6 +19,7 @@ public class LobbyController(LobbyService lobbyService) : ControllerBase
     }
     
     [HttpPost("create")]
+    [Authorize(Policy = "BotOwner")]
     public async Task Create([FromBody] CreateLobbyModel request)
     {
         await lobbyService.CreateLobby(request);
@@ -49,6 +50,7 @@ public class LobbyController(LobbyService lobbyService) : ControllerBase
     }
     
     [HttpGet("{id:int}/config")]
+    [Authorize(Policy = "BotOwner")]
     public async Task<ActionResult<LobbyConfiguration>> GetConfig(int id)
     {
         var config = await lobbyService.GetConfiguration(id);
@@ -56,6 +58,7 @@ public class LobbyController(LobbyService lobbyService) : ControllerBase
     }
 
     [HttpPost("{id:int}/config")]
+    [Authorize(Policy = "BotOwner")]
     public async Task<ActionResult> UpdateConfig(int id, LobbyConfiguration newConfiguration)
     {
         await LobbyService.UpdateConfiguration(id, newConfiguration);

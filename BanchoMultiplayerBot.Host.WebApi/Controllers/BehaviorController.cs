@@ -17,6 +17,7 @@ public class BehaviorController : ControllerBase
     }
     
     [HttpPost("config")]
+    [Authorize(Policy = "BotOwner")]
     public async Task SetBehaviorConfig(int lobbyId, string behaviorName, [FromBody] BehaviorConfigModel configuration)
     {
         await BehaviorService.SetBehaviorConfig(lobbyId, behaviorName, configuration.Configuration);

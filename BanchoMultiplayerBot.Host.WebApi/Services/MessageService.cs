@@ -1,4 +1,5 @@
 ﻿using BanchoMultiplayerBot.Host.WebApi.DataTransferObjects;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BanchoMultiplayerBot.Host.WebApi.Services;
 

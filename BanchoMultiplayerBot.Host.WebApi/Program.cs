@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using BanchoMultiplayerBot;
 using BanchoMultiplayerBot.Database;
 using BanchoMultiplayerBot.Host.WebApi.Extensions;
@@ -66,6 +67,11 @@ builder.Services.AddAuthentication(options =>
 })
 .AddBotCookieAuthentication(builder.Configuration)
 .AddBotOsuAuth(builder.Configuration);
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("BotOwner", policyBuilder => policyBuilder.RequireClaim(ClaimTypes.Name, builder.Configuration["Osu:Username"]!));
+});
 
 // create a default CORS policy
 builder.Services.AddCors(options =>

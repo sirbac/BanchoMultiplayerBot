@@ -17,6 +17,7 @@ public class MessageController(MessageService messageService) : ControllerBase
     }
     
     [HttpPost("send")]
+    [Authorize(Policy = "BotOwner")]
     public void SendMessage([FromBody] SendMessageModel message)
     {
         messageService.SendLobbyMessage(message.LobbyId, message.Content);
