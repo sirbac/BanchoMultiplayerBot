@@ -11,47 +11,58 @@ public class RestartCommand : IPlayerCommand
 
     public bool AllowGlobal => true;
 
-    public bool Administrator => false;
+    public bool Administrator => true;
 
-    public int MinimumArguments => 0;
+    public int MinimumArguments => 1;
 
-    public string? Usage => null;
+    public string Usage => "!restart <lobby_id>";
 
     private static bool _isRestarting;
-    
+
     public Task ExecuteAsync(CommandEventContext message)
     {
         // Race condition can probably appear here, but... no
         if (_isRestarting)
         {
+            message.Reply("Restart currently in progress.");
+            return Task.CompletedTask;
+        }
+
+        _isRestarting = true;
+
+        if (!int.TryParse(message.Arguments[0], out var lobbyId))
+        {
+            message.Reply("Usage: !restart <lobby_id>");
             return Task.CompletedTask;
         }
         
-        _isRestarting = true;
+        message.Reply("Restarting, this might take a second or two...");
 
-        message.Reply("Restarting removed lobbies...");
-        
         _ = Task.Run(async () =>
         {
-            foreach (var lobby in message.Bot.Lobbies.Where(lobby => lobby.Health == LobbyHealth.EventTimeoutReached))
+            var lobby = message.Bot.Lobbies.FirstOrDefault(lobby => lobby.LobbyConfigurationId == lobbyId);
+
+            if (lobby == null)
             {
-                await lobby.ConnectAsync();
-
-                int attempts = 0;
-                while (!(lobby.Health == LobbyHealth.Ok || lobby.Health == LobbyHealth.Idle))
-                {
-                    if (attempts++ > 10)
-                    {
-                        break;
-                    }
-                        
-                    await Task.Delay(1000);
-                }
+                return;
             }
+            
+            await lobby.ConnectAsync();
 
+            var attempts = 0;
+            while (lobby.Health is not (LobbyHealth.Ok or LobbyHealth.Idle))
+            {
+                if (attempts++ > 10)
+                {
+                    break;
+                }
+
+                await Task.Delay(1000);
+            }
+            
             _isRestarting = false;
         });
-        
+
         return Task.CompletedTask;
     }
 }
